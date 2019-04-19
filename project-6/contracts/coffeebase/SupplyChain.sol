@@ -85,6 +85,11 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
     require(msg.value >= _price); 
     _;
   }
+
+  modifier positive(uint _price) {
+    require(_price > 0);
+    _;
+  }
   
   // Define a modifier that checks the price and refunds the remaining balance
   modifier checkValue(uint _upc) {
@@ -162,50 +167,70 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   function harvestItem(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes) public 
   {
     // Add the new item as part of Harvest
-    
+    uint productID = sku + _upc;
+    items[_upc] = Item({
+      sku: sku,
+      upc: _upc,
+      ownerID: _originFarmerID,
+      originFarmerID: _originFarmerID,
+      originFarmName: _originFarmName,
+      originFarmInformation: _originFarmInformation,
+      originFarmLatitude: _originFarmLatitude,
+      originFarmLongitude: _originFarmLongitude,
+      productID: productID,
+      productNotes: _productNotes,
+      productPrice: 0,
+      itemState: State.Harvested,
+      distributorID: address(0),
+      retailerID: address(0),
+      consumerID: address(0)
+    });
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event
-    
+    emit Harvested(_upc);
   }
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
   function processItem(uint _upc) public 
   // Call modifier to check if upc has passed previous supply chain stage
-  
+  harvested(_upc)
   // Call modifier to verify caller of this function
-  
+  verifyCaller(items[_upc].originFarmerID)
   {
     // Update the appropriate fields
-    
+    items[_upc].itemState = State.Processed;
     // Emit the appropriate event
-    
+    emit Processed(_upc);
   }
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
   function packItem(uint _upc) public 
   // Call modifier to check if upc has passed previous supply chain stage
-  
+  processed(_upc)
   // Call modifier to verify caller of this function
-  
+  verifyCaller(items[_upc].originFarmerID)
   {
     // Update the appropriate fields
-    
+    items[_upc].itemState = State.Packed;
     // Emit the appropriate event
-    
+    emit Packed(_upc);
   }
 
   // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
   function sellItem(uint _upc, uint _price) public 
   // Call modifier to check if upc has passed previous supply chain stage
-  
+  packed(_upc)
   // Call modifier to verify caller of this function
-  
+  verifyCaller(items[_upc].originFarmerID)
+  // Call modifier to verify the price of this item is positive
+  positive(_price)
   {
     // Update the appropriate fields
-    
+    items[_upc].itemState = State.ForSale;
+    items[_upc].productPrice = _price;
     // Emit the appropriate event
-    
+    emit ForSale(_upc);
   }
 
   // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
@@ -213,18 +238,21 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   // and any excess ether sent is refunded back to the buyer
   function buyItem(uint _upc) public payable 
     // Call modifier to check if upc has passed previous supply chain stage
-    
+    forSale(_upc)
     // Call modifer to check if buyer has paid enough
-    
+    paidEnough(items[_upc].productPrice)
     // Call modifer to send any excess ether back to buyer
-    
+    checkValue(_upc)
     {
     
     // Update the appropriate fields - ownerID, distributorID, itemState
-    
+    items[_upc].ownerID = msg.sender;
+    items[_upc].distributorID = msg.sender;
+    items[_upc].itemState = State.Sold;
     // Transfer money to farmer
-    
+    items[_upc].originFarmerID.transfer(items[_upc].productPrice);
     // emit the appropriate event
+    emit Sold(_upc);
     
   }
 
@@ -232,40 +260,44 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   // Use the above modifers to check if the item is sold
   function shipItem(uint _upc) public 
     // Call modifier to check if upc has passed previous supply chain stage
-    
+    sold(_upc)
     // Call modifier to verify caller of this function
-    
+    verifyCaller(items[_upc].distributorID)
     {
     // Update the appropriate fields
-    
+    items[_upc].itemState = State.Shipped;
     // Emit the appropriate event
-    
+    emit Shipped(_upc);
   }
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
   function receiveItem(uint _upc) public 
     // Call modifier to check if upc has passed previous supply chain stage
-    
+    shipped(_upc)
     // Access Control List enforced by calling Smart Contract / DApp
     {
     // Update the appropriate fields - ownerID, retailerID, itemState
-    
+    items[_upc].ownerID = msg.sender;
+    items[_upc].retailerID = msg.sender;
+    items[_upc].itemState = State.Received;
     // Emit the appropriate event
-    
+    emit Received(_upc);
   }
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
   function purchaseItem(uint _upc) public 
     // Call modifier to check if upc has passed previous supply chain stage
-    
+    received(_upc)
     // Access Control List enforced by calling Smart Contract / DApp
     {
     // Update the appropriate fields - ownerID, consumerID, itemState
-    
+    items[_upc].ownerID = msg.sender;
+    items[_upc].consumerID = msg.sender;
+    items[_upc].itemState = State.Purchased;
     // Emit the appropriate event
-    
+    emit Purchased(_upc);
   }
 
   // Define a function 'fetchItemBufferOne' that fetches the data
@@ -282,8 +314,14 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   ) 
   {
   // Assign values to the 8 parameters
-  
-    
+  itemSKU = items[_upc].sku;
+  itemUPC = items[_upc].upc;
+  ownerID = items[_upc].ownerID;
+  originFarmerID = items[_upc].originFarmerID;
+  originFarmName = items[_upc].originFarmName;
+  originFarmInformation = items[_upc].originFarmInformation;
+  originFarmLatitude = items[_upc].originFarmLatitude;
+  originFarmLongitude = items[_upc].originFarmLongitude;
   return 
   (
   itemSKU,
@@ -312,8 +350,15 @@ contract SupplyChain is FarmerRole, DistributorRole, RetailerRole, ConsumerRole 
   ) 
   {
     // Assign values to the 9 parameters
-  
-    
+  itemSKU = items[_upc].sku;
+  itemUPC = items[_upc].upc;
+  productID = items[_upc].productID;
+  productNotes = items[_upc].productNotes;
+  productPrice = items[_upc].productPrice;
+  itemState = uint(items[_upc].itemState);
+  distributorID = items[_upc].distributorID;
+  retailerID = items[_upc].retailerID;
+  consumerID = items[_upc].consumerID;
   return 
   (
   itemSKU,
