@@ -1,4 +1,4 @@
 {
   "mnemonic": "<your-bip39-wallet-mnemonic>",
-  "rinkeby": "https://rinkeby.infura.io/v3/<your-project-id>"
+  "infuraProjectId": "<your-infura-project-id>"
 }
