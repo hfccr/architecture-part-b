@@ -90,6 +90,20 @@ In a separate terminal window, launch the DApp:
 npm run dev
 ```
 
+### Rinkeby Deployment
+
+This contract is deployed on the Rinkeby testnet at the addresss
+0x207437502fe639cdc3936ff78eed8d1fadad252e.
+
+Rinkeby deployments can be carried out using,
+
+```bash
+truffle migrate --network rinkeby
+```
+Rinkeby connection is provided by Infura.
+To make your own Infura deployment, copy your
+projectId from your Infura dashboard and add it to /project6/keys.json as the value for key 'infuraProjectId'.
+
 ## Built With
 
 * [Ethereum](https://www.ethereum.org/) - Ethereum is a decentralized platform that runs smart contracts
