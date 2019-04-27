@@ -10,7 +10,7 @@ contract Ownable is SupplyChain {
     event TransferOwnership(address indexed oldOwner, address indexed newOwner);
 
     /// Assign the contract to an owner
-    constructor () internal {
+    constructor () public payable {
         origOwner = msg.sender;
         emit TransferOwnership(address(0), origOwner);
     }
