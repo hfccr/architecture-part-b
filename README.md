@@ -93,7 +93,7 @@ npm run dev
 ### Rinkeby Deployment
 
 This contract is deployed on the Rinkeby testnet at the addresss
-0x207437502fe639cdc3936ff78eed8d1fadad252e.
+0xa1c0588d8cc3cd301ca10799c2e198b97af09cc3.
 
 Rinkeby deployments can be carried out using,
 
