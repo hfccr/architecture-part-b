@@ -115,13 +115,13 @@ to make the web faster, safer, and more open.
 * [Truffle Framework](http://truffleframework.com/) - Truffle is the most popular development framework for Ethereum with a mission to make your life a whole lot easier.
 
 
-## Authors
+## Project Plan
 
-See also the list of [contributors](https://github.com/your/project/contributors.md) who participated in this project.
-
-## Acknowledgments
-
-* Solidity
-* Ganache-cli
-* Truffle
-* IPFS
+* Activity Diagram
+![uml activity](uml/Coffee-Activity.png)
+* State Diagram
+![uml state](uml/Coffee-State.png)
+* Sequence Diagram
+![uml sequence](uml/Coffee-Sequence.png)
+* Class Diagram
+![uml class](uml/Coffee-Class.png)
