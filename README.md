@@ -93,6 +93,10 @@ npm run dev
 
 * truffle-hdwallet-provider: HD Wallet-enabled Web3 provider. Use it to sign transactions for addresses derived from a 12-word mnemonic
 
+### Rinkeby Setup
+
+In order to deploy to a public network, a keys.json file needs to be created. This file will contain a mnemonic and the Infura project ID. A sample file keys.sample.json contains the format required for writing the keys.json file. keys.json is added to .gitignore and should not be committed as it contains the mnemonic for deriving the private keys.
+
 ### Rinkeby Deployment
 
 This contract is deployed on the Rinkeby testnet at the addresss
