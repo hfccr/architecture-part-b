@@ -89,6 +89,9 @@ In a separate terminal window, launch the DApp:
 ```
 npm run dev
 ```
+### Extra Libraries Used
+
+* truffle-hdwallet-provider: HD Wallet-enabled Web3 provider. Use it to sign transactions for addresses derived from a 12-word mnemonic
 
 ### Rinkeby Deployment
 
